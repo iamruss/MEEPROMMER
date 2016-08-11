@@ -5,6 +5,7 @@
 package SimpleJBurn;
 
 import gnu.io.CommPortIdentifier;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Toolkit;
@@ -29,20 +30,19 @@ import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 /**
- *
  * @author mario
  */
 public class MainFrame extends javax.swing.JFrame implements PropertyChangeListener {
 
-    static private final String revision = "$Revision: 1.5 $";
-    static private final String date = "$Date: 2013/07/19 05:44:46 $";
+    static private final String revision = "$Revision: 1.6 $";
+    static private final String date = "$Date: 08/11/2016 14:00:00 $";
     //used to end a line in the output window
     static private final String newline = "\n";
     private static final String[] EEPROMTYPES = {"28C64  (8k) ", "28C128 (16k)", "28C256 (32k)"};
     private static final String[] OFFSETS = {"---", " 1k", " 2k", " 3k", " 4k", " 5k", " 6k",
-        " 7k", " 8k", " 9k", "10k", "11k", "12k", "13k", "14k", "15k", "16k", "17k",
-        "18k", "19k", "20k", "21k", "22k", "23k", "24k", "25k", "26k", "27k",
-        "28k", "29k", "30k", "31k"};
+            " 7k", " 8k", " 9k", "10k", "11k", "12k", "13k", "14k", "15k", "16k", "17k",
+            "18k", "19k", "20k", "21k", "22k", "23k", "24k", "25k", "26k", "27k",
+            "28k", "29k", "30k", "31k"};
     private ReadTask readTask;
     private WriteTask writeTask;
     MySerial mySerial = new MySerial();
@@ -72,41 +72,40 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
         public Void doInBackground() {
             //check if eeprom should be read or written
             try {
-            try {
-                //remove old data from input stream to prevent them "poisening" our
-                //data
-                mySerial.in.skip(mySerial.in.available());
-                //take time to read the eeprom
-                start = System.currentTimeMillis();
-                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(mySerial.out));
-                String line = "";
+                try {
+                    //remove old data from input stream to prevent them "poisening" our
+                    //data
+                    mySerial.in.skip(mySerial.in.available());
+                    //take time to read the eeprom
+                    start = System.currentTimeMillis();
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(mySerial.out));
+                    String line = "";
 
 
-                log.insertString(log.getLength(), "sending command." + newline,null);
-                bw.write("r,0000," + Utility.wordToHex(maxAddress) + ",20" + newline);
-                bw.flush();
-                log.insertString(log.getLength(), "command sent." + newline,null);
-                log.insertString(log.getLength(), "trying to read." + newline,null);
-                int counter = 0;
-                byte c = ' ';
-                do {
-                    eeprom[counter++] = (byte) mySerial.in.read();
-                    if (counter % 100 == 0) {
-                        readProgress = 100 * counter / maxAddress;
-                        setProgress(readProgress);
-                    }
-                } while (counter < maxAddress);
-                end = System.currentTimeMillis();
-                setProgress(100);
+                    log.insertString(log.getLength(), "sending command." + newline, null);
+                    bw.write("r,0000," + Utility.wordToHex(maxAddress) + ",20" + newline);
+                    bw.flush();
+                    log.insertString(log.getLength(), "command sent." + newline, null);
+                    log.insertString(log.getLength(), "trying to read." + newline, null);
+                    int counter = 0;
+                    byte c = ' ';
+                    do {
+                        eeprom[counter++] = (byte) mySerial.in.read();
+                        if (counter % 100 == 0) {
+                            readProgress = 100 * counter / maxAddress;
+                            setProgress(readProgress);
+                        }
+                    } while (counter < maxAddress);
+                    end = System.currentTimeMillis();
+                    setProgress(100);
 
 
-            } catch (Exception e) {
-                log.insertString(log.getLength(), "Error: " + e.getMessage() + newline,null);
+                } catch (Exception e) {
+                    log.insertString(log.getLength(), "Error: " + e.getMessage() + newline, null);
+                }
+            } catch (BadLocationException e) {
+                System.err.println("Output Error");
             }
-        } catch (BadLocationException e) {
-            System.err.println("Output Error");
-        }
-
 
 
             /**
@@ -126,32 +125,32 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
          */
         @Override
         public void done() {
-            try{ 
+            try {
                 Toolkit.getDefaultToolkit().beep();
-            clearButton.setEnabled(true);
-            writeButton.setEnabled(true);
-            readButton.setEnabled(true);
-            setCursor(null); //turn off the wait cursor
-            log.insertString(log.getLength(), maxAddress + " bytes read in " + (float) (end - start) / 1000
-                    + " seconds " + newline,null);
-            textPane.setCaretPosition(textPane.getDocument().getLength());
-            if (this.diff) {
-                log.insertString(log.getLength(), "Checking difference between loaded ROM file and data on EEPROM"
-                        + newline,null);
-                int byteCount = 0;
-                //this.readEEPROM();
-                for (int i = 0; i < filesize; i++) {
-                    if (data[i] != eeprom[i + offset]) {
-                        byteCount++;
+                clearButton.setEnabled(true);
+                writeButton.setEnabled(true);
+                readButton.setEnabled(true);
+                setCursor(null); //turn off the wait cursor
+                log.insertString(log.getLength(), maxAddress + " bytes read in " + (float) (end - start) / 1000
+                        + " seconds " + newline, null);
+                textPane.setCaretPosition(textPane.getDocument().getLength());
+                if (this.diff) {
+                    log.insertString(log.getLength(), "Checking difference between loaded ROM file and data on EEPROM"
+                            + newline, null);
+                    int byteCount = 0;
+                    //this.readEEPROM();
+                    for (int i = 0; i < filesize; i++) {
+                        if (data[i] != eeprom[i + offset]) {
+                            byteCount++;
+                        }
                     }
+                    log.insertString(log.getLength(), filesize + " bytes checked from 0x" + Utility.wordToHex(offset)
+                            + " to 0x" + Utility.wordToHex(offset + (int) filesize - 1) + ", " + byteCount
+                            + " byte are different." + newline, null);
                 }
-                log.insertString(log.getLength(), filesize + " bytes checked from 0x" + Utility.wordToHex(offset)
-                        + " to 0x" + Utility.wordToHex(offset + (int) filesize - 1) + ", " + byteCount
-                        + " byte are different." + newline,null);
+            } catch (BadLocationException e) {
+                System.err.println("Output Error");
             }
-        } catch (BadLocationException e) {
-            System.err.println("Output Error");
-        }
 
         }
     }
@@ -164,6 +163,8 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
         long start, end = 0;
         int writeProgress = 0;
 
+        final int WRITE_BUFFER_SIZE = 128;
+
         public WriteTask(int a, int l) {
             this.len = l;
             this.address = a;
@@ -174,50 +175,49 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
 
         @Override
         public Void doInBackground() {
-            try{
             try {
-                //take time to read the eeprom
-                start = System.currentTimeMillis();
-                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(mySerial.out));
-                String line = "";
-                log.insertString(log.getLength(), "sending command." + newline,null);
-                for (int i = 0; i < len; i += 1024) {
-                    bw.write("w," + Utility.wordToHex(address + i) + "," + Utility.wordToHex(1024) + newline);
-                    bw.flush();
-                    writeProgress = i * 100 / len;
-                    setProgress(writeProgress);
-                    mySerial.out.write(data, i, 1024);
-                    log.insertString(log.getLength(), "wrote data from 0x" + Utility.wordToHex(address + i)
-                            + " to 0x" + Utility.wordToHex(address + i + 1023) + newline,null);
-                    byte c = ' ';
-                    do {
-                        c = (byte) mySerial.in.read();
-                    } while (c != '%');
+                try {
+                    //take time to read the eeprom
+                    start = System.currentTimeMillis();
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(mySerial.out));
+                    String line = "";
+                    log.insertString(log.getLength(), "sending command." + newline, null);
+                    for (int i = 0; i < len; i += WRITE_BUFFER_SIZE) {
+                        bw.write("w," + Utility.wordToHex(address + i) + "," + Utility.wordToHex(WRITE_BUFFER_SIZE) + newline);
+                        bw.flush();
+                        writeProgress = i * 100 / len;
+                        setProgress(writeProgress);
+                        mySerial.out.write(data, i, WRITE_BUFFER_SIZE);
+                        log.insertString(log.getLength(), "wrote data from 0x" + Utility.wordToHex(address + i)
+                                + " to 0x" + Utility.wordToHex(address + i + WRITE_BUFFER_SIZE-1) + newline, null);
+                        byte c = ' ';
+                        do {
+                            c = (byte) mySerial.in.read();
+                        } while (c != '%');
 
+                    }
+                    end = System.currentTimeMillis();
+                    setProgress(100);
+
+
+                } catch (Exception e) {
+                    log.insertString(log.getLength(), "Error: " + e.getMessage() + newline, null);
                 }
-                end = System.currentTimeMillis();
-                setProgress(100);
 
-
-
-            } catch (Exception e) {
-                log.insertString(log.getLength(), "Error: " + e.getMessage() + newline,null);
+                /**
+                 * Random random = new Random(); int progress = 0; int steps = 100 /
+                 * (maxAddress / 1024); //Initialize progress property.
+                 * setProgress(0); for (int i = offset; i < maxAddress; i += 1024) {
+                 * try { Thread.sleep(random.nextInt(300)); } catch
+                 * (InterruptedException ignore) { } progress = i * 100 /
+                 * maxAddress; done = i; setProgress(Math.min(progress, 100)); }
+                 * setProgress(100); return null; *
+                 */
+            } catch (BadLocationException e) {
+                System.err.println("Output Error");
             }
-
-            /**
-             * Random random = new Random(); int progress = 0; int steps = 100 /
-             * (maxAddress / 1024); //Initialize progress property.
-             * setProgress(0); for (int i = offset; i < maxAddress; i += 1024) {
-             * try { Thread.sleep(random.nextInt(300)); } catch
-             * (InterruptedException ignore) { } progress = i * 100 /
-             * maxAddress; done = i; setProgress(Math.min(progress, 100)); }
-             * setProgress(100); return null; *
-             */
-        } catch (BadLocationException e) {
-            System.err.println("Output Error");
-        }
             return null;
-            
+
         }
 
         /*
@@ -230,17 +230,17 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
             writeButton.setEnabled(true);
             readButton.setEnabled(true);
             setCursor(null); //turn off the wait cursor
-            try{
-            log.insertString(log.getLength(), "data sent." + newline,null);
+            try {
+                log.insertString(log.getLength(), "data sent." + newline, null);
 
-            log.insertString(log.getLength(), "wrote " + len + " bytes from 0x"
-                    + Utility.wordToHex(address) + " to 0x"
-                    + Utility.wordToHex(address + (int) len - 1) + " in "
-                    + (float) (end - start) / 1000
-                    + " seconds " + newline,null);
-        } catch (BadLocationException e) {
-            System.err.println("Output Error");
-        }
+                log.insertString(log.getLength(), "wrote " + len + " bytes from 0x"
+                        + Utility.wordToHex(address) + " to 0x"
+                        + Utility.wordToHex(address + (int) len - 1) + " in "
+                        + (float) (end - start) / 1000
+                        + " seconds " + newline, null);
+            } catch (BadLocationException e) {
+                System.err.println("Output Error");
+            }
 
         }
     }
@@ -372,7 +372,7 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
 
         jLabel2.setText("EEPROM Type :");
 
-        eepromTypeSelect.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "28C64  (8k) ", "28C128 (16k)", "28C256 (32k)" }));
+        eepromTypeSelect.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"28C64  (8k) ", "28C128 (16k)", "28C256 (32k)"}));
         eepromTypeSelect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 eepromTypeSelectActionPerformed(evt);
@@ -381,7 +381,7 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
 
         jLabel3.setText("Offset :");
 
-        offsetSelect.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "---", " 1k", " 2k", " 3k", " 4k", " 5k", " 6k", " 7k", " 8k", " 9k", "10k", "11k", "12k", "13k", "14k", "15k", "16k", "17k", "18k", "19k", "20k", "21k", "22k", "23k", "24k", "25k", "26k", "27k", "28k", "29k", "30k", "31k" }));
+        offsetSelect.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"---", " 1k", " 2k", " 3k", " 4k", " 5k", " 6k", " 7k", " 8k", " 9k", "10k", "11k", "12k", "13k", "14k", "15k", "16k", "17k", "18k", "19k", "20k", "21k", "22k", "23k", "24k", "25k", "26k", "27k", "28k", "29k", "30k", "31k"}));
         offsetSelect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 offsetSelectActionPerformed(evt);
@@ -412,81 +412,81 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
         org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jPanel1Layout.createSequentialGroup()
-                .add(25, 25, 25)
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPanel1Layout.createSequentialGroup()
-                        .add(clearButton)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(readButton)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(writeButton)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 298, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .add(jPanel1Layout.createSequentialGroup()
-                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jPanel1Layout.createSequentialGroup()
-                                .add(jLabel1)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(serialSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 245, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                                .add(jLabel2)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                                .add(eepromTypeSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 135, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(jLabel3)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
-                            .add(jPanel1Layout.createSequentialGroup()
-                                .add(loadButton)
-                                .add(18, 18, 18)
-                                .add(saveButton)
-                                .add(18, 18, 18)
-                                .add(versionButton)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(showImageButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 125, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .add(18, 18, 18)
-                                .add(showDataButton)
-                                .add(24, 24, 24)))
-                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(offsetSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(showDiffButton))
-                        .add(18, 18, 18))))
+                jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(jPanel1Layout.createSequentialGroup()
+                                .add(25, 25, 25)
+                                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                        .add(jPanel1Layout.createSequentialGroup()
+                                                .add(clearButton)
+                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                                .add(readButton)
+                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                                .add(writeButton)
+                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 298, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .add(jPanel1Layout.createSequentialGroup()
+                                                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                                        .add(jPanel1Layout.createSequentialGroup()
+                                                                .add(jLabel1)
+                                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                                                .add(serialSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 245, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                                                                .add(jLabel2)
+                                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                                                                .add(eepromTypeSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 135, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                .add(jLabel3)
+                                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
+                                                        .add(jPanel1Layout.createSequentialGroup()
+                                                                .add(loadButton)
+                                                                .add(18, 18, 18)
+                                                                .add(saveButton)
+                                                                .add(18, 18, 18)
+                                                                .add(versionButton)
+                                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                .add(showImageButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 125, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                                .add(18, 18, 18)
+                                                                .add(showDataButton)
+                                                                .add(24, 24, 24)))
+                                                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                                        .add(offsetSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                        .add(showDiffButton))
+                                                .add(18, 18, 18))))
         );
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(12, Short.MAX_VALUE)
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                        .add(showDataButton)
-                        .add(showDiffButton)
-                        .add(showImageButton))
-                    .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                        .add(loadButton)
-                        .add(saveButton)
-                        .add(versionButton)))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                        .add(serialSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(jLabel1))
-                    .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                        .add(offsetSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(jLabel3))
-                    .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                        .add(eepromTypeSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(jLabel2)))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(5, 5, 5))
-                    .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                        .add(writeButton)
-                        .add(readButton)
-                        .add(clearButton))))
+                jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addContainerGap(12, Short.MAX_VALUE)
+                                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                                .add(showDataButton)
+                                                .add(showDiffButton)
+                                                .add(showImageButton))
+                                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                                .add(loadButton)
+                                                .add(saveButton)
+                                                .add(versionButton)))
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                                .add(serialSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                .add(jLabel1))
+                                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                                .add(offsetSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                .add(jLabel3))
+                                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                                .add(eepromTypeSelect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                .add(jLabel2)))
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                        .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1Layout.createSequentialGroup()
+                                                .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                .add(5, 5, 5))
+                                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                                .add(writeButton)
+                                                .add(readButton)
+                                                .add(clearButton))))
         );
 
         textPane.setEditable(false);
@@ -497,16 +497,16 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
+                        .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 493, Short.MAX_VALUE))
+                layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(layout.createSequentialGroup()
+                                .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 493, Short.MAX_VALUE))
         );
 
         pack();
@@ -514,22 +514,22 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
 
     private void appendToLog(String text) {
         try {
-            log.insertString(log.getLength(),text,null);
+            log.insertString(log.getLength(), text, null);
         } catch (BadLocationException e) {
-         System.err.println("Output Error" + e.getMessage() + newline);   
+            System.err.println("Output Error" + e.getMessage() + newline);
         }
     }
-    
+
     private void serialSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serialSelectActionPerformed
         appendToLog("now selected: " + serialSelect.getSelectedItem() + newline);
         selectedComPort = (String) serialSelect.getSelectedItem();
         try {
             mySerial.disconnect();
             mySerial.connect(selectedComPort, 57600);
-            log.insertString(log.getLength(), selectedComPort + " is now connected." + newline,null);
+            log.insertString(log.getLength(), selectedComPort + " is now connected." + newline, null);
             Thread.sleep(1000);
         } catch (Exception ex) {
-           appendToLog( "Error : " + ex.getMessage() + newline);
+            appendToLog("Error : " + ex.getMessage() + newline);
         }
 
     }//GEN-LAST:event_serialSelectActionPerformed
@@ -552,16 +552,16 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             //This is where a real application would open the file.
-            appendToLog( "Opening: " + file.getAbsolutePath() + "."
+            appendToLog("Opening: " + file.getAbsolutePath() + "."
                     + newline);
             if (file.length() <= 32768) {
                 loadFile(file);
             } else {
-                appendToLog( "Error: " + file.getName()
+                appendToLog("Error: " + file.getName()
                         + "is too big to load.");
             }
         } else {
-            appendToLog( "Open command cancelled by user." + newline);
+            appendToLog("Open command cancelled by user." + newline);
         }
 
     }//GEN-LAST:event_loadButtonActionPerformed
@@ -584,10 +584,10 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
 
         int len = textPane.getDocument().getLength();
         textPane.setCaretPosition(len);
-        appendToLog( "now selected: " + eepromTypeSelect.getSelectedItem()
+        appendToLog("now selected: " + eepromTypeSelect.getSelectedItem()
                 + ", address range = 0x0000 to 0x"
                 + Utility.wordToHex(maxAddress - 1) + newline);
-       
+
     }//GEN-LAST:event_eepromTypeSelectActionPerformed
 
     private void offsetSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_offsetSelectActionPerformed
@@ -604,11 +604,11 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
 
             textPane.setCaretPosition(textPane.getDocument().getLength());
         }
-        
+
     }//GEN-LAST:event_offsetSelectActionPerformed
 
     private void versionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_versionButtonActionPerformed
-            appendToLog("Simple JBurn - Revision : " + revision + ", " + date + newline);
+        appendToLog("Simple JBurn - Revision : " + revision + ", " + date + newline);
         if (mySerial.isConnected()) {
             try {
                 mySerial.out.write('V');
@@ -619,7 +619,7 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
                     c = (byte) mySerial.in.read();
                     line = line + (char) c;
                     if (c == '\n') {
-                        appendToLog( line);
+                        appendToLog(line);
                         line = "";
                     }
                 } while (c != '\n');
@@ -632,7 +632,7 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
     }//GEN-LAST:event_versionButtonActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
-            int returnVal = fc.showSaveDialog(this);
+        int returnVal = fc.showSaveDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             //This is where a real application would open the file.
@@ -641,12 +641,12 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
             try {
                 FileOutputStream fout = new FileOutputStream(file.getAbsolutePath());
                 fout.write(eeprom, 0, maxAddress);
-                appendToLog( maxAddress + " bytes saved to \"" + file.getName() + "\"" + newline);
+                appendToLog(maxAddress + " bytes saved to \"" + file.getName() + "\"" + newline);
             } catch (IOException e) {
-                appendToLog( "Error while saving file");
+                appendToLog("Error while saving file");
             }
         } else {
-            appendToLog( "Save command cancelled by user." + newline);
+            appendToLog("Save command cancelled by user." + newline);
         }
     }//GEN-LAST:event_saveButtonActionPerformed
 
@@ -658,7 +658,7 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
             }
             line = line + Utility.byteToHex(data[i]) + " ";
             if (i % 32 == 31) {
-                appendToLog( line + newline);
+                appendToLog(line + newline);
                 line = "";
             }
 
@@ -725,17 +725,18 @@ public class MainFrame extends javax.swing.JFrame implements PropertyChangeListe
     }//GEN-LAST:event_clearButtonActionPerformed
 
     public void loadFile(File file) {
-            try {
-                FileInputStream fin = new FileInputStream(file.getAbsolutePath());
-                filesize = file.length();
-                for (int i = 0; i < file.length(); i++) {
-                    data[i] = (byte) fin.read();
-                }
-                appendToLog( filesize + " bytes loaded from \"" + file.getName() + "\"" + newline);
-            } catch (IOException e) {
-                appendToLog( "Error: File not found");
+        try {
+            FileInputStream fin = new FileInputStream(file.getAbsolutePath());
+            filesize = file.length();
+            for (int i = 0; i < file.length(); i++) {
+                data[i] = (byte) fin.read();
             }
+            appendToLog(filesize + " bytes loaded from \"" + file.getName() + "\"" + newline);
+        } catch (IOException e) {
+            appendToLog("Error: File not found");
+        }
     }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearButton;
     private javax.swing.JComboBox eepromTypeSelect;
