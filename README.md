@@ -1,9 +1,6 @@
 MEEPROMMER
 ==========
 
-__Note: This version has been modified to use smaller serial buffers to work better with cheap CH340G-based Arduino clones.__
-The Arduino bootloader was also modified to increase its serial buffers using this guide: http://folk.uio.no/jeanra/Microelectronics/CustomSizeArduinoBuffer.html
-
 EEPROM programmer based on Arduino hardware
 
 The MEEPROMMER is a combination of hardware and software that lets you read and write 
